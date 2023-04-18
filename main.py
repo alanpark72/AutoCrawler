@@ -53,8 +53,8 @@ class Sites:
 
 
 class AutoCrawler:
-    def __init__(self, skip_already_exist=True, n_threads=4, do_google=True, transparent=False, do_naver=True, download_path='download',
-                 full_resolution=False, face=False, no_gui=False, limit=0, proxy_list=None):
+    def __init__(self, skip_already_exist=True, n_threads=4, do_google=True, do_naver=True, transparent=False, download_path='download',
+                 keyword='keywords.txt', full_resolution=False, face=False, no_gui=False, limit=0, proxy_list=None):
         """
         :param skip_already_exist: Skips keyword already downloaded before. This is needed when re-downloading.
         :param n_threads: Number of threads to download.
@@ -71,9 +71,10 @@ class AutoCrawler:
         self.skip = skip_already_exist
         self.n_threads = n_threads
         self.do_google = do_google
-        self.transparent = transparent
         self.do_naver = do_naver
+        self.transparent = transparent
         self.download_path = download_path
+        self.keyword = keyword
         self.full_resolution = full_resolution
         self.face = face
         self.no_gui = no_gui
@@ -272,7 +273,7 @@ class AutoCrawler:
         signal.signal(signal.SIGINT, signal.SIG_IGN)
         
     def do_crawling(self):
-        keywords = self.get_keywords()
+        keywords = self.get_keywords(self.keyword)
 
         tasks = []
 
@@ -361,8 +362,10 @@ if __name__ == '__main__':
                         help='Skips keyword already downloaded before. This is needed when re-downloading.')
     parser.add_argument('--threads', type=int, default=4, help='Number of threads to download.')
     parser.add_argument('--google', type=str, default='true', help='Download from google.com (boolean)')
-    parser.add_argument('--transparent', type=str, default='false', help='Filter for transparent background images(for google)')
     parser.add_argument('--naver', type=str, default='true', help='Download from naver.com (boolean)')
+    parser.add_argument('--transparent', type=str, default='false', help='Filter for transparent background images(for google)')
+    parser.add_argument('--download_path', type=str, default='download', help='Download Path for crawled data. (Class directories are generated automatically.)')
+    parser.add_argument('--keyword', type=str, default='keywords.txt', help='Keyword file path. (File extension must be *.txt)')
     parser.add_argument('--full', type=str, default='false',
                         help='Download full resolution image instead of thumbnails (slow)')
     parser.add_argument('--face', type=str, default='false', help='Face search mode')
@@ -380,8 +383,10 @@ if __name__ == '__main__':
     _skip = False if str(args.skip).lower() == 'false' else True
     _threads = args.threads
     _google = False if str(args.google).lower() == 'false' else True
-    _transparent = False if str(args.transparent).lower() == 'false' else True 
     _naver = False if str(args.naver).lower() == 'false' else True
+    _transparent = False if str(args.transparent).lower() == 'false' else True
+    _download_path = args.download_path
+    _keyword = args.keyword
     _full = False if str(args.full).lower() == 'false' else True
     _face = False if str(args.face).lower() == 'false' else True
     _limit = int(args.limit)
@@ -396,10 +401,10 @@ if __name__ == '__main__':
         _no_gui = False
 
     print(
-        'Options - skip:{}, threads:{}, google:{}, transparent:{}, naver:{}, full_resolution:{}, face:{}, no_gui:{}, limit:{}, _proxy_list:{}'
-            .format(_skip, _threads, _google, _transparent, _naver, _full, _face, _no_gui, _limit, _proxy_list))
+        'Options - skip:{}, threads:{}, google:{}, naver:{}, transparent:{}, download_path:{}, keyword:{}, full_resolution:{}, face:{}, no_gui:{}, limit:{}, _proxy_list:{}'
+            .format(_skip, _threads, _google, _naver, _transparent, _download_path, _keyword, _full, _face, _no_gui, _limit, _proxy_list))
 
     crawler = AutoCrawler(skip_already_exist=_skip, n_threads=_threads,
-                          do_google=_google, transparent=_transparent, do_naver=_naver, full_resolution=_full,
-                          face=_face, no_gui=_no_gui, limit=_limit, proxy_list=_proxy_list)
+                          do_google=_google, do_naver=_naver, transparent=_transparent, download_path=_download_path, keyword=_keyword, 
+                          full_resolution=_full, face=_face, no_gui=_no_gui, limit=_limit, proxy_list=_proxy_list)
     crawler.do_crawling()
